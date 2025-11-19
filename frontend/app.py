@@ -43,28 +43,27 @@ body {background-color: #e6f2ff;}
     margin-bottom: 20px;
 }
 
-/* Sidebar buttons: uniforme y activo */
-[data-testid="stSidebar"] button {
-    width: 90% !important;
-    height: 50px !important;
-    margin: 5px auto !important;
-    background-color: #99ccff !important;
-    color: #003366 !important;
-    font-weight: bold !important;
-    border-radius: 8px !important;
-    font-size: 16px !important;
-}
-[data-testid="stSidebar"] button:hover {
-    background-color: #80bfff !important;
-}
-
-/* Botón activo */
-[data-testid="stSidebar"] .active-button {
-    background-color: #80bfff !important;
-    color: #001f4d !important;
+/* Sidebar HTML buttons */
+.sidebar-button {
+    display: block;
+    width: 90%;
+    height: 50px;
+    line-height: 50px;
+    margin: 5px auto;
+    text-align: center;
+    background-color: #99ccff;
+    color: #003366;
     font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.2s, transform 0.2s;
 }
-
+.sidebar-button:hover {
+    background-color: #80bfff;
+    transform: translateY(-2px);
+}
 div[data-testid="stSidebar"] img {
     display: block;
     margin-left:auto;
@@ -111,7 +110,7 @@ def api_pending():
 def parse_due(dt): return dt.strftime("%Y-%m-%d %H:%M") if dt else "—"
 def priority_class(p): return f"priority-{p}" if p in [1,2,3,4,5] else "priority-3"
 
-# ------------------ Sidebar menu con botones nativos ------------------
+# ------------------ Sidebar menu HTML ------------------
 menu_items = [
     ("📋 Ver tareas","Ver tareas"),
     ("✏️ Crear tarea","Crear tarea"),
@@ -121,29 +120,19 @@ menu_items = [
     ("ℹ️ Acerca","Acerca")
 ]
 
-if "menu" not in st.session_state:
-    st.session_state.menu = "Ver tareas"
+# Detectar selección via query param
+query_params = st.experimental_get_query_params()
+menu = query_params.get("menu", ["Ver tareas"])[0]
+st.session_state.menu = menu
 
+# Render HTML buttons con link de query param
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
+for icon, value in menu_items:
+    st.sidebar.markdown(f'''
+        <a class="sidebar-button" href="?menu={value}">{icon}</a>
+    ''', unsafe_allow_html=True)
 
-# Renderizar botones y marcar activo
-for icon_label, value in menu_items:
-    is_active = "active-button" if st.session_state.menu == value else ""
-    if st.sidebar.button(icon_label, key=value):
-        st.session_state.menu = value
-        st.experimental_rerun()
-    # Reaplicar clase activa vía HTML
-    if is_active:
-        st.sidebar.markdown(f"""
-        <script>
-        const btn = window.parent.document.querySelector('[data-testid="stSidebar"] button:nth-child({menu_items.index((icon_label,value))+2})');
-        if(btn) btn.classList.add('active-button');
-        </script>
-        """, unsafe_allow_html=True)
-
-menu = st.session_state.menu
-
-# ------------------ Vistas ------------------
+# ------------------ Views ------------------
 if menu == "Ver tareas":
     st.header("📋 Todas las tareas")
     tasks = api_list()
