@@ -1,0 +1,94 @@
+/* ===== Sidebar ===== */
+div[data-testid="stSidebar"] {
+    background-color: #cce6ff !important;
+    padding: 0 !important;
+}
+
+div[data-testid="stSidebarContent"] {
+    padding-top: 5px !important;
+    margin-top: 0 !important;
+}
+
+div[data-testid="stSidebar"] img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px !important;
+    margin-bottom: 10px !important;
+    width: 70% !important;
+}
+
+/* Sidebar headings */
+div[data-testid="stSidebarContent"] h2,
+div[data-testid="stSidebarContent"] h3,
+div[data-testid="stSidebarContent"] h4 {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* ===== Tables ===== */
+.stDataFrame table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.stDataFrame th, .stDataFrame td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.stDataFrame tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.stDataFrame tr:hover {
+    background-color: #cce6ff;
+}
+
+.stDataFrame th {
+    background-color: #3399ff;
+    color: white;
+    text-align: center;
+}
+
+/* ===== Buttons ===== */
+.stButton>button {
+    background-color: #3399ff;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 12px;
+    border: none;
+    transition: 0.3s;
+    font-weight: bold;
+}
+
+.stButton>button:hover {
+    background-color: #2673cc;
+}
+
+/* Button variants */
+.stButton.complete>button {
+    background-color: #28a745 !important;
+}
+
+.stButton.complete>button:hover {
+    background-color: #218838 !important;
+}
+
+.stButton.delete>button {
+    background-color: #dc3545 !important;
+}
+
+.stButton.delete>button:hover {
+    background-color: #c82333 !important;
+}
+
+/* ===== Expander styling ===== */
+.stExpander {
+    background-color: #f9f9f9;
+    border-left: 4px solid #3399ff;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
