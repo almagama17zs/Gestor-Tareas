@@ -43,6 +43,7 @@ body {background-color: #e6f2ff;}
 [data-testid="stSidebar"] {
     background-color: #cce6ff !important;
     padding-top: 20px;
+    width: 300px !important; /* 3cm aprox */
 }
 .sidebar-title {
     font-size: 24px;
@@ -51,24 +52,19 @@ body {background-color: #e6f2ff;}
     color: #0059b3;
     margin-bottom: 20px;
 }
-/* Sidebar HTML button */
-.sidebar-button {
-    display: block;
-    width: 90%;
-    margin: 5px auto;
-    padding: 10px 0;
-    text-align: center;
-    background-color: #99ccff;
-    color: #003366;
-    font-weight: bold;
-    border-radius: 8px;
+/* Uniform Streamlit buttons */
+[data-testid="stSidebar"] button {
+    width: 90% !important;
+    margin: 5px auto !important;
+    padding: 10px 0 !important;
+    background-color: #99ccff !important;
+    color: #003366 !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
-    text-decoration: none;
 }
-.sidebar-button:hover {
-    background-color: #80bfff;
-    transform: translateY(-2px);
+[data-testid="stSidebar"] button:hover {
+    background-color: #80bfff !important;
 }
 div[data-testid="stSidebar"] img {
     display: block;
@@ -129,7 +125,7 @@ def parse_due(dt): return dt.strftime("%Y-%m-%d %H:%M") if dt else "—"
 def priority_class(p): return f"priority-{p}" if p in [1,2,3,4,5] else "priority-3"
 
 # ------------------
-# Sidebar menu with uniform HTML buttons
+# Sidebar menu using Streamlit buttons
 # ------------------
 menu_items = [
     ("📋 Ver tareas","Ver tareas"),
@@ -145,23 +141,9 @@ if "menu" not in st.session_state:
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
-# Render buttons and handle clicks
 for icon_label, value in menu_items:
-    st.sidebar.markdown(
-        f'<div class="sidebar-button" onclick="window.location.href=\'#{value}\'">{icon_label}</div>',
-        unsafe_allow_html=True
-    )
-
-# Detect which button is clicked
-if "clicked_menu" not in st.session_state:
-    st.session_state.clicked_menu = None
-
-clicked = st.experimental_get_query_params().get("menu")
-if clicked:
-    clicked_label = clicked[0]
-    for icon_label, value in menu_items:
-        if clicked_label == value:
-            st.session_state.menu = value
+    if st.sidebar.button(icon_label, key=value):
+        st.session_state.menu = value
 
 menu = st.session_state.menu
 
