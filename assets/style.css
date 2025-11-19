@@ -35,6 +35,12 @@ div[data-testid="stSidebar"] img {
     width:70%;
 }
 
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: #cce6ff !important;
+    padding-top: 20px;
+    width: 300px !important;  /* ancho más ancho */
+}
 /* Sidebar title */
 .sidebar-title {
     font-size: 24px;
