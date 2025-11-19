@@ -90,7 +90,7 @@ if os.path.exists(logo_file):
 
 # ------------------ Header ------------------
 st.title("🗂️ Gestor de Tareas Inteligente")
-st.markdown("Frontend Streamlit con backend simulado en memoria (sin Java).")
+st.markdown("Bienvenido al Gestor de Tareas Inteligente. Usa el menú lateral para navegar y crear o revisar tus tareas.")
 
 # ------------------ Backend simulado ------------------
 if "tasks" not in st.session_state:
