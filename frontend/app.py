@@ -1,6 +1,5 @@
 # frontend/app.py
 import streamlit as st
-import pandas as pd
 from datetime import datetime, date, time
 import os
 
@@ -53,24 +52,19 @@ body {background-color: #e6f2ff;}
     color: #0059b3;
     margin-bottom: 20px;
 }
-.sidebar-button {
-    display: block;
-    width: 90%;
-    margin: 5px auto;
-    padding: 10px 0;
-    text-align: center;
-    background-color: #99ccff;
-    color: #003366;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    text-decoration: none;
+/* Uniform sidebar buttons */
+[data-testid="stSidebar"] button {
+    width: 90% !important;
+    margin: 5px auto !important;
+    padding: 10px 0 !important;
+    background-color: #99ccff !important;
+    color: #003366 !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
 }
-.sidebar-button:hover {
-    background-color: #80bfff;
-    transform: translateY(-2px);
+[data-testid="stSidebar"] button:hover {
+    background-color: #80bfff !important;
 }
 div[data-testid="stSidebar"] img {
     display: block;
@@ -102,7 +96,6 @@ st.markdown("Frontend Streamlit con backend simulado en memoria (sin Java).")
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
 
-# ----------- Backend functions -----------
 def api_list(): return st.session_state.tasks
 def api_get(task_id): return next((t for t in st.session_state.tasks if t["id"] == task_id), None)
 def api_create(payload):
@@ -132,41 +125,20 @@ def parse_due(dt): return dt.strftime("%Y-%m-%d %H:%M") if dt else "—"
 def priority_class(p): return f"priority-{p}" if p in [1,2,3,4,5] else "priority-3"
 
 # ------------------
-# Sidebar menu with uniform HTML buttons
+# Sidebar menu with Streamlit buttons
 # ------------------
-menu_items = [("📋 Ver tareas","Ver tareas"),("✏️ Crear tarea","Crear tarea"),("💡 Sugerencias","Sugerencias"),
-              ("🔍 Buscar","Buscar"),("📝 Tareas pendientes","Tareas pendientes"),("ℹ️ Acerca","Acerca")]
+menu_items = [("📋 Ver tareas","Ver tareas"),("✏️ Crear tarea","Crear tarea"),
+              ("💡 Sugerencias","Sugerencias"),("🔍 Buscar","Buscar"),
+              ("📝 Tareas pendientes","Tareas pendientes"),("ℹ️ Acerca","Acerca")]
 
 if "menu" not in st.session_state:
     st.session_state.menu = "Ver tareas"
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
-# Render HTML buttons and handle clicks
 for icon_label, value in menu_items:
-    # HTML form button
-    st.sidebar.markdown(
-        f'''
-        <form action="#" method="post">
-            <input type="submit" name="menu" value="{icon_label}" class="sidebar-button">
-            <input type="hidden" name="menu_value" value="{value}">
-        </form>
-        ''',
-        unsafe_allow_html=True
-    )
-
-# Detect which button was clicked and update menu
-if st.session_state.get("clicked_menu") is None:
-    st.session_state.clicked_menu = None
-
-clicked = st.experimental_get_query_params().get("menu")
-if clicked:
-    clicked_label = clicked[0]
-    # Match label to value
-    for icon_label, value in menu_items:
-        if clicked_label == icon_label:
-            st.session_state.menu = value
-            st.experimental_rerun()
+    if st.sidebar.button(icon_label, key=value):
+        st.session_state.menu = value
 
 menu = st.session_state.menu
 
@@ -192,7 +164,9 @@ if menu == "Ver tareas":
 if menu == "Crear tarea":
     st.header("✏️ Crear / Editar tarea")
     edit_task = st.session_state.get("edit_task", None)
-    if edit_task and st.button("Cancelar edición"): st.session_state.pop("edit_task", None); st.experimental_rerun()
+    if edit_task and st.button("Cancelar edición"): 
+        st.session_state.pop("edit_task", None)
+        st.experimental_rerun()
     with st.form("task_form", clear_on_submit=False):
         title = st.text_input("Título", value=edit_task.get("title") if edit_task else "")
         description = st.text_area("Descripción", value=edit_task.get("description") if edit_task else "")
@@ -210,8 +184,13 @@ if menu == "Crear tarea":
                 due_dt = datetime.combine(due_date, due_time) if due_date else None
                 payload = {"title": title.strip(),"description": description,"priority": int(priority),
                            "estimatedMinutes": int(estimated),"completed": bool(completed),"dueDate": due_dt}
-                if edit_task: api_update(edit_task.get("id"),payload); st.success("Tarea actualizada"); st.session_state.pop("edit_task", None)
-                else: api_create(payload); st.success("Tarea creada")
+                if edit_task:
+                    api_update(edit_task.get("id"),payload)
+                    st.success("Tarea actualizada")
+                    st.session_state.pop("edit_task", None)
+                else:
+                    api_create(payload)
+                    st.success("Tarea creada")
 
 # View: Sugerencias
 if menu == "Sugerencias":
