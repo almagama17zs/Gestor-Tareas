@@ -43,7 +43,7 @@ body {background-color: #e6f2ff;}
     margin-bottom: 20px;
 }
 
-/* Streamlit buttons uniformes */
+/* Sidebar buttons: uniforme y activo */
 [data-testid="stSidebar"] button {
     width: 90% !important;
     height: 50px !important;
@@ -57,6 +57,14 @@ body {background-color: #e6f2ff;}
 [data-testid="stSidebar"] button:hover {
     background-color: #80bfff !important;
 }
+
+/* Botón activo */
+[data-testid="stSidebar"] .active-button {
+    background-color: #80bfff !important;
+    color: #001f4d !important;
+    font-weight: bold;
+}
+
 div[data-testid="stSidebar"] img {
     display: block;
     margin-left:auto;
@@ -118,9 +126,20 @@ if "menu" not in st.session_state:
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
+# Renderizar botones y marcar activo
 for icon_label, value in menu_items:
+    is_active = "active-button" if st.session_state.menu == value else ""
     if st.sidebar.button(icon_label, key=value):
         st.session_state.menu = value
+        st.experimental_rerun()
+    # Reaplicar clase activa vía HTML
+    if is_active:
+        st.sidebar.markdown(f"""
+        <script>
+        const btn = window.parent.document.querySelector('[data-testid="stSidebar"] button:nth-child({menu_items.index((icon_label,value))+2})');
+        if(btn) btn.classList.add('active-button');
+        </script>
+        """, unsafe_allow_html=True)
 
 menu = st.session_state.menu
 
