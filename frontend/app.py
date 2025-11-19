@@ -5,9 +5,7 @@ import os
 
 st.set_page_config(page_title="Gestor de Tareas Inteligente", layout="wide")
 
-# ------------------
-# CSS
-# ------------------
+# ------------------ CSS ------------------
 st.markdown("""
 <style>
 /* Body background */
@@ -35,7 +33,7 @@ body {background-color: #e6f2ff;}
 [data-testid="stSidebar"] {
     background-color: #cce6ff !important;
     padding-top: 20px;
-    width: 300px !important; /* ancho 3cm aprox */
+    width: 300px !important; /* 3cm aprox */
 }
 .sidebar-title {
     font-size: 24px;
@@ -45,7 +43,7 @@ body {background-color: #e6f2ff;}
     margin-bottom: 20px;
 }
 
-/* Sidebar buttons como divs */
+/* Sidebar HTML buttons */
 .sidebar-button {
     display: block;
     width: 90%;
@@ -59,6 +57,7 @@ body {background-color: #e6f2ff;}
     border-radius: 8px;
     cursor: pointer;
     text-decoration: none;
+    font-size: 16px;
     transition: background-color 0.2s, transform 0.2s;
 }
 .sidebar-button:hover {
@@ -76,22 +75,16 @@ div[data-testid="stSidebar"] img {
 </style>
 """, unsafe_allow_html=True)
 
-# ------------------
-# Sidebar logo
-# ------------------
+# ------------------ Sidebar logo ------------------
 logo_file = os.path.join("assets", "logo.png")
 if os.path.exists(logo_file):
     st.sidebar.image(logo_file, use_column_width=True)
 
-# ------------------
-# Page header
-# ------------------
+# ------------------ Header ------------------
 st.title("🗂️ Gestor de Tareas Inteligente")
 st.markdown("Frontend Streamlit con backend simulado en memoria (sin Java).")
 
-# ------------------
-# Backend simulado
-# ------------------
+# ------------------ Backend simulado ------------------
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
 
@@ -117,9 +110,7 @@ def api_pending():
 def parse_due(dt): return dt.strftime("%Y-%m-%d %H:%M") if dt else "—"
 def priority_class(p): return f"priority-{p}" if p in [1,2,3,4,5] else "priority-3"
 
-# ------------------
-# Sidebar menu con divs (uniformes)
-# ------------------
+# ------------------ Sidebar menu con divs uniformes ------------------
 menu_items = [
     ("📋 Ver tareas","Ver tareas"),
     ("✏️ Crear tarea","Crear tarea"),
@@ -134,26 +125,22 @@ if "menu" not in st.session_state:
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
-# Render sidebar buttons como HTML div
+# Render HTML buttons con onclick simulando selección de menú
 for icon_label, value in menu_items:
-    clicked = st.sidebar.button(icon_label, key=value)
-    if clicked:
+    if st.sidebar.button(icon_label, key=value):
         st.session_state.menu = value
 
 menu = st.session_state.menu
 
-# ------------------
-# Views
-# ------------------
+# ------------------ Views ------------------
 if menu == "Ver tareas":
     st.header("📋 Todas las tareas")
     tasks = api_list()
-    if not tasks:
-        st.info("No hay tareas en el sistema.")
+    if not tasks: st.info("No hay tareas en el sistema.")
     else:
-        for t in tasks:
+        for t in sorted(tasks, key=lambda x: (x["completed"], x["priority"])):
             status = "✅ Completada" if t.get("completed") else "⏳ Pendiente"
-            st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']} — {status}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='task-card {priority_class(t['priority'])}'><strong>{t['title']}</strong> — {status}</div>", unsafe_allow_html=True)
 
 if menu == "Crear tarea":
     st.header("✏️ Crear tarea")
