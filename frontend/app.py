@@ -1,8 +1,9 @@
 # frontend/app.py
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, date, time
 import os
 
+# ------------------ Configuración página ------------------
 st.set_page_config(page_title="Gestor de Tareas Inteligente", layout="wide")
 
 # ------------------ CSS ------------------
@@ -47,8 +48,8 @@ body {background-color: #e6f2ff;}
 .sidebar-button {
     display: block;
     width: 90%;
-    height: 50px;       /* altura uniforme */
-    line-height: 50px;  /* texto centrado verticalmente */
+    height: 50px;       
+    line-height: 50px;  
     margin: 5px auto;
     text-align: center;
     background-color: #99ccff;
@@ -63,6 +64,9 @@ body {background-color: #e6f2ff;}
 .sidebar-button:hover {
     background-color: #80bfff;
     transform: translateY(-2px);
+}
+.sidebar-button.active {
+    background-color: #66b3ff;
 }
 
 div[data-testid="stSidebar"] img {
@@ -126,10 +130,18 @@ if "menu" not in st.session_state:
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
-# Render HTML buttons
+# Render HTML buttons y marcar activo
 for icon_label, value in menu_items:
-    if st.sidebar.button(icon_label, key=value):
-        st.session_state.menu = value
+    active_class = "active" if st.session_state.menu == value else ""
+    st.sidebar.markdown(
+        f'<div class="sidebar-button {active_class}" onclick="window.location.href=\'#{value}\'">{icon_label}</div>',
+        unsafe_allow_html=True
+    )
+
+# ------------------ Detectar botón clicado ------------------
+clicked = st.experimental_get_query_params().get("menu")
+if clicked:
+    st.session_state.menu = clicked[0]
 
 menu = st.session_state.menu
 
@@ -137,7 +149,8 @@ menu = st.session_state.menu
 if menu == "Ver tareas":
     st.header("📋 Todas las tareas")
     tasks = api_list()
-    if not tasks: st.info("No hay tareas en el sistema.")
+    if not tasks:
+        st.info("No hay tareas en el sistema.")
     else:
         for t in tasks:
             status = "✅ Completada" if t.get("completed") else "⏳ Pendiente"
@@ -145,30 +158,51 @@ if menu == "Ver tareas":
 
 if menu == "Crear tarea":
     st.header("✏️ Crear tarea")
-    with st.form("task_form"):
+    with st.form("task_form", clear_on_submit=True):
         title = st.text_input("Título")
         priority = st.slider("Prioridad (1=alta,5=baja)",1,5,value=3)
-        if st.form_submit_button("Guardar"):
-            api_create({"title": title, "priority": priority, "completed": False})
+        due_date = st.date_input("Fecha de vencimiento", value=date.today())
+        due_time = st.time_input("Hora de vencimiento", value=time(12,0))
+        completed = st.checkbox("Completada")
+        if st.form_submit_button("Guardar tarea"):
+            due_dt = datetime.combine(due_date, due_time)
+            api_create({"title": title, "priority": priority, "completed": completed, "dueDate": due_dt})
             st.success("Tarea creada")
 
 if menu == "Sugerencias":
     st.header("💡 Orden sugerido")
-    for t in api_suggest():
-        st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
+    suggested = api_suggest()
+    if not suggested:
+        st.info("No hay tareas pendientes.")
+    else:
+        for t in suggested:
+            st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
 
 if menu == "Buscar":
     st.header("🔍 Buscar tareas")
     q = st.text_input("Cadena a buscar")
     if st.button("Buscar"):
-        for t in api_search(q):
-            st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
+        results = api_search(q)
+        if results:
+            for t in results:
+                st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
+        else:
+            st.info("No se encontraron coincidencias")
 
 if menu == "Tareas pendientes":
     st.header("📝 Pendientes")
-    for t in api_pending():
-        st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
+    pending = api_pending()
+    if not pending:
+        st.info("No hay tareas pendientes.")
+    else:
+        for t in pending:
+            st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
 
 if menu == "Acerca":
     st.header("ℹ️ Acerca")
-    st.markdown("- Backend en memoria\n- Frontend Streamlit\n- CRUD funcional")
+    st.markdown("""
+- Backend en memoria
+- Frontend Streamlit
+- CRUD funcional
+- Los datos se guardan en memoria (se pierden al refrescar)
+""")
