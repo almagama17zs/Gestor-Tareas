@@ -52,16 +52,19 @@ body {background-color: #e6f2ff;}
     color: #0059b3;
     margin-bottom: 20px;
 }
-/* Uniform Streamlit buttons */
+
+/* Streamlit sidebar buttons: uniform height and width */
 [data-testid="stSidebar"] button {
     width: 90% !important;
+    height: 50px !important; /* altura uniforme */
     margin: 5px auto !important;
-    padding: 10px 0 !important;
+    padding: 0 !important;
     background-color: #99ccff !important;
     color: #003366 !important;
     font-weight: bold !important;
     border-radius: 8px !important;
     cursor: pointer;
+    font-size: 16px !important;
 }
 [data-testid="stSidebar"] button:hover {
     background-color: #80bfff !important;
