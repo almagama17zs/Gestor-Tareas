@@ -14,7 +14,6 @@ st.set_page_config(page_title="Gestor de Tareas Inteligente", layout="wide")
 # ------------------
 css_file = os.path.join("assets", "style.css")
 if os.path.exists(css_file):
-    # inject external CSS
     with open(css_file) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
@@ -44,7 +43,7 @@ body {background-color: #e6f2ff;}
 
 /* Sidebar */
 [data-testid="stSidebar"] {
-    background-color: #cce6ff !important; /* Light blue */
+    background-color: #cce6ff !important;
     padding-top: 20px;
 }
 .sidebar-title {
@@ -66,6 +65,7 @@ body {background-color: #e6f2ff;}
     font-size: 16px;
     font-weight: bold;
     text-decoration: none;
+    cursor: pointer;
     transition: background-color 0.2s, transform 0.2s;
 }
 .sidebar-button:hover {
@@ -132,7 +132,7 @@ def parse_due(dt): return dt.strftime("%Y-%m-%d %H:%M") if dt else "—"
 def priority_class(p): return f"priority-{p}" if p in [1,2,3,4,5] else "priority-3"
 
 # ------------------
-# Sidebar menu with uniform buttons
+# Sidebar menu with uniform HTML buttons
 # ------------------
 menu_items = [("📋 Ver tareas","Ver tareas"),("✏️ Crear tarea","Crear tarea"),("💡 Sugerencias","Sugerencias"),
               ("🔍 Buscar","Buscar"),("📝 Tareas pendientes","Tareas pendientes"),("ℹ️ Acerca","Acerca")]
@@ -142,15 +142,31 @@ if "menu" not in st.session_state:
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
-# Render buttons as HTML to force uniform size
+# Render HTML buttons and handle clicks
 for icon_label, value in menu_items:
-    if st.sidebar.button(icon_label, key=f"tmp_{value}"):
-        st.session_state.menu = value
-    # Render HTML button
+    # HTML form button
     st.sidebar.markdown(
-        f'<div class="sidebar-button" onclick="window.location.href=\'#{value}\'">{icon_label}</div>', 
+        f'''
+        <form action="#" method="post">
+            <input type="submit" name="menu" value="{icon_label}" class="sidebar-button">
+            <input type="hidden" name="menu_value" value="{value}">
+        </form>
+        ''',
         unsafe_allow_html=True
     )
+
+# Detect which button was clicked and update menu
+if st.session_state.get("clicked_menu") is None:
+    st.session_state.clicked_menu = None
+
+clicked = st.experimental_get_query_params().get("menu")
+if clicked:
+    clicked_label = clicked[0]
+    # Match label to value
+    for icon_label, value in menu_items:
+        if clicked_label == icon_label:
+            st.session_state.menu = value
+            st.experimental_rerun()
 
 menu = st.session_state.menu
 
