@@ -62,7 +62,7 @@ div[data-testid="stSidebar"] img {
     border-radius: 8px;
     font-size: 16px;
     font-weight: bold;
-    text-decoration: none;
+    text-decoration: none;  /* <--- quita subrayado */
     transition: background-color 0.2s, transform 0.2s;
     cursor: pointer;
 }

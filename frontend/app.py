@@ -129,8 +129,9 @@ st.session_state.menu = menu
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 for icon, value in menu_items:
     st.sidebar.markdown(f'''
-        <a class="sidebar-button" href="?menu={value}">{icon}</a>
+        <a class="sidebar-button" href="?menu={value}" target="_self">{icon}</a>
     ''', unsafe_allow_html=True)
+
 
 # ------------------ Views ------------------
 if menu == "Ver tareas":
