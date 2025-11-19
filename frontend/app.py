@@ -3,19 +3,11 @@ import streamlit as st
 from datetime import datetime, date, time
 import os
 
-# ------------------
-# Page configuration
-# ------------------
 st.set_page_config(page_title="Gestor de Tareas Inteligente", layout="wide")
 
 # ------------------
-# Apply CSS for colors, hover effects, sidebar
+# CSS
 # ------------------
-css_file = os.path.join("assets", "style.css")
-if os.path.exists(css_file):
-    with open(css_file) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
 st.markdown("""
 <style>
 /* Body background */
@@ -43,7 +35,7 @@ body {background-color: #e6f2ff;}
 [data-testid="stSidebar"] {
     background-color: #cce6ff !important;
     padding-top: 20px;
-    width: 300px !important; /* 3cm aprox */
+    width: 300px !important; /* ancho 3cm aprox */
 }
 .sidebar-title {
     font-size: 24px;
@@ -53,21 +45,25 @@ body {background-color: #e6f2ff;}
     margin-bottom: 20px;
 }
 
-/* Streamlit sidebar buttons: uniform height and width */
-[data-testid="stSidebar"] button {
-    width: 90% !important;
-    height: 50px !important; /* altura uniforme */
-    margin: 5px auto !important;
-    padding: 0 !important;
-    background-color: #99ccff !important;
-    color: #003366 !important;
-    font-weight: bold !important;
-    border-radius: 8px !important;
+/* Sidebar buttons como divs */
+.sidebar-button {
+    display: block;
+    width: 90%;
+    height: 50px;
+    line-height: 50px;
+    margin: 5px auto;
+    text-align: center;
+    background-color: #99ccff;
+    color: #003366;
+    font-weight: bold;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 16px !important;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.2s;
 }
-[data-testid="stSidebar"] button:hover {
-    background-color: #80bfff !important;
+.sidebar-button:hover {
+    background-color: #80bfff;
+    transform: translateY(-2px);
 }
 div[data-testid="stSidebar"] img {
     display: block;
@@ -94,13 +90,12 @@ st.title("🗂️ Gestor de Tareas Inteligente")
 st.markdown("Frontend Streamlit con backend simulado en memoria (sin Java).")
 
 # ------------------
-# Simulated backend
+# Backend simulado
 # ------------------
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
 
 def api_list(): return st.session_state.tasks
-def api_get(task_id): return next((t for t in st.session_state.tasks if t["id"] == task_id), None)
 def api_create(payload):
     payload["id"] = len(st.session_state.tasks) + 1
     st.session_state.tasks.append(payload)
@@ -111,10 +106,6 @@ def api_update(task_id, payload):
             payload["id"] = task_id
             st.session_state.tasks[i] = payload
             return payload
-    return None
-def api_delete(task_id):
-    st.session_state.tasks = [t for t in st.session_state.tasks if t["id"] != task_id]
-    return True
 def api_suggest():
     return sorted([t for t in st.session_state.tasks if not t.get("completed")],
                   key=lambda x: (x["priority"], x.get("dueDate") or datetime.max))
@@ -123,12 +114,11 @@ def api_search(q):
 def api_pending():
     return [t for t in st.session_state.tasks if not t.get("completed")]
 
-# ----------- Utilities -----------
 def parse_due(dt): return dt.strftime("%Y-%m-%d %H:%M") if dt else "—"
 def priority_class(p): return f"priority-{p}" if p in [1,2,3,4,5] else "priority-3"
 
 # ------------------
-# Sidebar menu using Streamlit buttons
+# Sidebar menu con divs (uniformes)
 # ------------------
 menu_items = [
     ("📋 Ver tareas","Ver tareas"),
@@ -144,105 +134,56 @@ if "menu" not in st.session_state:
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
+# Render sidebar buttons como HTML div
 for icon_label, value in menu_items:
-    if st.sidebar.button(icon_label, key=value):
+    clicked = st.sidebar.button(icon_label, key=value)
+    if clicked:
         st.session_state.menu = value
 
 menu = st.session_state.menu
 
-# ----------- Views -----------
-
-# Ver tareas
+# ------------------
+# Views
+# ------------------
 if menu == "Ver tareas":
     st.header("📋 Todas las tareas")
     tasks = api_list()
-    if not tasks: st.info("No hay tareas en el sistema.")
+    if not tasks:
+        st.info("No hay tareas en el sistema.")
     else:
-        for t in sorted(tasks, key=lambda x: (x["completed"], x["priority"])):
-            status = "✅ Completada" if t["completed"] else "⏳ Pendiente"
-            st.markdown(f"""
-                <div class='task-card {priority_class(t['priority'])}'>
-                    <strong>ID {t['id']}: {t['title']}</strong><br>
-                    {t.get('description','')}<br>
-                    Prioridad: {t['priority']} — Estimado: {t['estimatedMinutes']} min — Vencimiento: {parse_due(t.get('dueDate'))} — {status}
-                </div>
-            """, unsafe_allow_html=True)
+        for t in tasks:
+            status = "✅ Completada" if t.get("completed") else "⏳ Pendiente"
+            st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']} — {status}</div>", unsafe_allow_html=True)
 
-# Crear / Editar tarea
 if menu == "Crear tarea":
-    st.header("✏️ Crear / Editar tarea")
-    edit_task = st.session_state.get("edit_task", None)
-    if edit_task and st.button("Cancelar edición"): 
-        st.session_state.pop("edit_task", None)
-        st.experimental_rerun()
-    with st.form("task_form", clear_on_submit=False):
-        title = st.text_input("Título", value=edit_task.get("title") if edit_task else "")
-        description = st.text_area("Descripción", value=edit_task.get("description") if edit_task else "")
-        priority = st.slider("Prioridad (1=alta,5=baja)",1,5,value=edit_task.get("priority") if edit_task else 3)
-        estimated = st.number_input("Tiempo estimado (min)",1,10000,value=edit_task.get("estimatedMinutes") if edit_task else 30)
-        col1,col2 = st.columns(2)
-        with col1:
-            due_date = st.date_input("Fecha de vencimiento", value=edit_task.get("dueDate").date() if edit_task and edit_task.get("dueDate") else None)
-        with col2:
-            due_time = st.time_input("Hora de vencimiento", value=edit_task.get("dueDate").time() if edit_task and edit_task.get("dueDate") else time(0,0))
-        completed = st.checkbox("Completada", value=edit_task.get("completed") if edit_task else False)
-        if st.form_submit_button("Guardar tarea"):
-            if not title.strip(): st.error("El título es obligatorio.")
-            else:
-                due_dt = datetime.combine(due_date, due_time) if due_date else None
-                payload = {"title": title.strip(),"description": description,"priority": int(priority),
-                           "estimatedMinutes": int(estimated),"completed": bool(completed),"dueDate": due_dt}
-                if edit_task:
-                    api_update(edit_task.get("id"),payload)
-                    st.success("Tarea actualizada")
-                    st.session_state.pop("edit_task", None)
-                else:
-                    api_create(payload)
-                    st.success("Tarea creada")
+    st.header("✏️ Crear tarea")
+    with st.form("task_form"):
+        title = st.text_input("Título")
+        priority = st.slider("Prioridad (1=alta,5=baja)",1,5,value=3)
+        if st.form_submit_button("Guardar"):
+            api_create({"title": title, "priority": priority, "completed": False})
+            st.success("Tarea creada")
 
-# Sugerencias
 if menu == "Sugerencias":
-    st.header("💡 Orden sugerido de tareas")
+    st.header("💡 Orden sugerido")
     suggested = api_suggest()
-    if not suggested: st.info("No hay tareas pendientes.")
-    else:
-        for t in suggested:
-            st.markdown(f"""
-                <div class='task-card {priority_class(t['priority'])}'>
-                    <strong>{t['title']}</strong><br>
-                    {t.get('description','')}<br>
-                    Prioridad: {t['priority']} — Estimado: {t['estimatedMinutes']} min — Vencimiento: {parse_due(t.get('dueDate'))}
-                </div>
-            """, unsafe_allow_html=True)
+    for t in suggested:
+        st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
 
-# Buscar
 if menu == "Buscar":
-    st.header("🔍 Buscar tareas por título")
+    st.header("🔍 Buscar tareas")
     q = st.text_input("Cadena a buscar")
     if st.button("Buscar"):
-        if not q.strip(): st.warning("Introduce texto")
-        else:
-            res = api_search(q.strip())
-            if res:
-                for t in res:
-                    st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']} — {t.get('description','')} — Prioridad {t['priority']} — {parse_due(t.get('dueDate'))}</div>", unsafe_allow_html=True)
-            else: st.info("No se encontraron coincidencias")
+        res = api_search(q)
+        for t in res:
+            st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
 
-# Tareas pendientes
 if menu == "Tareas pendientes":
-    st.header("📝 Tareas pendientes")
+    st.header("📝 Pendientes")
     pending = api_pending()
-    if not pending: st.info("No hay tareas pendientes.")
-    else:
-        for t in pending:
-            st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']} — Prioridad {t['priority']} — Vencimiento: {parse_due(t.get('dueDate'))}<br>{t.get('description','')}</div>", unsafe_allow_html=True)
+    for t in pending:
+        st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
 
-# Acerca
 if menu == "Acerca":
-    st.header("ℹ️ Acerca del proyecto")
-    st.markdown("""
-    - **Backend:** Simulado en memoria (no necesita Java).
-    - **Frontend:** Streamlit (este archivo).
-    - Todas las operaciones CRUD funcionan directamente en Streamlit.
-    - La app se reinicia al refrescar la página, porque los datos se guardan en memoria.
-    """)
+    st.header("ℹ️ Acerca")
+    st.markdown("- Backend en memoria\n- Frontend Streamlit\n- CRUD funcional")
