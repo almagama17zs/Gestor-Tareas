@@ -3,7 +3,10 @@
 Frontend desarrollado con **Streamlit** que permite gestionar tareas de manera interactiva, con **backend simulado en memoria** (no requiere Java ni base de datos). Ideal para pruebas rápidas o demos.
 
 ---
+## 🔗 Enlace
+https://gestor-tareas.streamlit.app/
 
+---
 ## 🚀 Características
 
 - CRUD completo de tareas (Crear, Leer, Actualizar, Eliminar)
