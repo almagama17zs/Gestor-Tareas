@@ -132,7 +132,7 @@ def parse_due(dt): return dt.strftime("%Y-%m-%d %H:%M") if dt else "—"
 def priority_class(p): return f"priority-{p}" if p in [1,2,3,4,5] else "priority-3"
 
 # ------------------
-# Sidebar menu with buttons
+# Sidebar menu with uniform buttons
 # ------------------
 menu_items = [("📋 Ver tareas","Ver tareas"),("✏️ Crear tarea","Crear tarea"),("💡 Sugerencias","Sugerencias"),
               ("🔍 Buscar","Buscar"),("📝 Tareas pendientes","Tareas pendientes"),("ℹ️ Acerca","Acerca")]
@@ -142,9 +142,16 @@ if "menu" not in st.session_state:
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
+# Render buttons as HTML to force uniform size
 for icon_label, value in menu_items:
-    if st.sidebar.button(icon_label, key=value.replace(' ','_')):
+    if st.sidebar.button(icon_label, key=f"tmp_{value}"):
         st.session_state.menu = value
+    # Render HTML button
+    st.sidebar.markdown(
+        f'<div class="sidebar-button" onclick="window.location.href=\'#{value}\'">{icon_label}</div>', 
+        unsafe_allow_html=True
+    )
+
 menu = st.session_state.menu
 
 # ----------- Views -----------
