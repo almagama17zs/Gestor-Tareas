@@ -1,6 +1,6 @@
 # frontend/app.py
 import streamlit as st
-from datetime import datetime, date, time
+from datetime import datetime
 import os
 
 st.set_page_config(page_title="Gestor de Tareas Inteligente", layout="wide")
@@ -33,7 +33,7 @@ body {background-color: #e6f2ff;}
 [data-testid="stSidebar"] {
     background-color: #cce6ff !important;
     padding-top: 20px;
-    width: 300px !important; /* 3cm aprox */
+    width: 300px !important;
 }
 .sidebar-title {
     font-size: 24px;
@@ -47,8 +47,8 @@ body {background-color: #e6f2ff;}
 .sidebar-button {
     display: block;
     width: 90%;
-    height: 50px;
-    line-height: 50px;
+    height: 50px;       /* altura uniforme */
+    line-height: 50px;  /* texto centrado verticalmente */
     margin: 5px auto;
     text-align: center;
     background-color: #99ccff;
@@ -64,6 +64,7 @@ body {background-color: #e6f2ff;}
     background-color: #80bfff;
     transform: translateY(-2px);
 }
+
 div[data-testid="stSidebar"] img {
     display: block;
     margin-left:auto;
@@ -110,7 +111,7 @@ def api_pending():
 def parse_due(dt): return dt.strftime("%Y-%m-%d %H:%M") if dt else "—"
 def priority_class(p): return f"priority-{p}" if p in [1,2,3,4,5] else "priority-3"
 
-# ------------------ Sidebar menu con divs uniformes ------------------
+# ------------------ Sidebar menu HTML ------------------
 menu_items = [
     ("📋 Ver tareas","Ver tareas"),
     ("✏️ Crear tarea","Crear tarea"),
@@ -125,7 +126,7 @@ if "menu" not in st.session_state:
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
-# Render HTML buttons con onclick simulando selección de menú
+# Render HTML buttons
 for icon_label, value in menu_items:
     if st.sidebar.button(icon_label, key=value):
         st.session_state.menu = value
@@ -138,7 +139,7 @@ if menu == "Ver tareas":
     tasks = api_list()
     if not tasks: st.info("No hay tareas en el sistema.")
     else:
-        for t in sorted(tasks, key=lambda x: (x["completed"], x["priority"])):
+        for t in tasks:
             status = "✅ Completada" if t.get("completed") else "⏳ Pendiente"
             st.markdown(f"<div class='task-card {priority_class(t['priority'])}'><strong>{t['title']}</strong> — {status}</div>", unsafe_allow_html=True)
 
@@ -153,22 +154,19 @@ if menu == "Crear tarea":
 
 if menu == "Sugerencias":
     st.header("💡 Orden sugerido")
-    suggested = api_suggest()
-    for t in suggested:
+    for t in api_suggest():
         st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
 
 if menu == "Buscar":
     st.header("🔍 Buscar tareas")
     q = st.text_input("Cadena a buscar")
     if st.button("Buscar"):
-        res = api_search(q)
-        for t in res:
+        for t in api_search(q):
             st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
 
 if menu == "Tareas pendientes":
     st.header("📝 Pendientes")
-    pending = api_pending()
-    for t in pending:
+    for t in api_pending():
         st.markdown(f"<div class='task-card {priority_class(t['priority'])}'>{t['title']}</div>", unsafe_allow_html=True)
 
 if menu == "Acerca":
