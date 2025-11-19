@@ -3,7 +3,6 @@ import streamlit as st
 from datetime import datetime, date, time
 import os
 
-# ------------------ Configuración página ------------------
 st.set_page_config(page_title="Gestor de Tareas Inteligente", layout="wide")
 
 # ------------------ CSS ------------------
@@ -44,31 +43,20 @@ body {background-color: #e6f2ff;}
     margin-bottom: 20px;
 }
 
-/* Sidebar HTML buttons */
-.sidebar-button {
-    display: block;
-    width: 90%;
-    height: 50px;       
-    line-height: 50px;  
-    margin: 5px auto;
-    text-align: center;
-    background-color: #99ccff;
-    color: #003366;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 16px;
-    transition: background-color 0.2s, transform 0.2s;
+/* Streamlit buttons uniformes */
+[data-testid="stSidebar"] button {
+    width: 90% !important;
+    height: 50px !important;
+    margin: 5px auto !important;
+    background-color: #99ccff !important;
+    color: #003366 !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
+    font-size: 16px !important;
 }
-.sidebar-button:hover {
-    background-color: #80bfff;
-    transform: translateY(-2px);
+[data-testid="stSidebar"] button:hover {
+    background-color: #80bfff !important;
 }
-.sidebar-button.active {
-    background-color: #66b3ff;
-}
-
 div[data-testid="stSidebar"] img {
     display: block;
     margin-left:auto;
@@ -115,7 +103,7 @@ def api_pending():
 def parse_due(dt): return dt.strftime("%Y-%m-%d %H:%M") if dt else "—"
 def priority_class(p): return f"priority-{p}" if p in [1,2,3,4,5] else "priority-3"
 
-# ------------------ Sidebar menu HTML ------------------
+# ------------------ Sidebar menu con botones nativos ------------------
 menu_items = [
     ("📋 Ver tareas","Ver tareas"),
     ("✏️ Crear tarea","Crear tarea"),
@@ -130,22 +118,13 @@ if "menu" not in st.session_state:
 
 st.sidebar.markdown('<div class="sidebar-title">Gestor de Tareas</div>', unsafe_allow_html=True)
 
-# Render HTML buttons y marcar activo
 for icon_label, value in menu_items:
-    active_class = "active" if st.session_state.menu == value else ""
-    st.sidebar.markdown(
-        f'<div class="sidebar-button {active_class}" onclick="window.location.href=\'#{value}\'">{icon_label}</div>',
-        unsafe_allow_html=True
-    )
-
-# ------------------ Detectar botón clicado ------------------
-clicked = st.experimental_get_query_params().get("menu")
-if clicked:
-    st.session_state.menu = clicked[0]
+    if st.sidebar.button(icon_label, key=value):
+        st.session_state.menu = value
 
 menu = st.session_state.menu
 
-# ------------------ Views ------------------
+# ------------------ Vistas ------------------
 if menu == "Ver tareas":
     st.header("📋 Todas las tareas")
     tasks = api_list()
@@ -164,7 +143,7 @@ if menu == "Crear tarea":
         due_date = st.date_input("Fecha de vencimiento", value=date.today())
         due_time = st.time_input("Hora de vencimiento", value=time(12,0))
         completed = st.checkbox("Completada")
-        if st.form_submit_button("Guardar tarea"):
+        if st.form_submit_button("Guardar"):
             due_dt = datetime.combine(due_date, due_time)
             api_create({"title": title, "priority": priority, "completed": completed, "dueDate": due_dt})
             st.success("Tarea creada")
