@@ -23,6 +23,16 @@ body {background-color: #e6f2ff;}
 [data-testid="stSidebar"] {
     background-color: #cce6ff !important;
     padding-top: 20px;
+    width: 300px !important;
+}
+
+/* Sidebar title */
+.sidebar-title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color: #0059b3;
+    margin-bottom: 20px;
 }
 
 /* Sidebar logo */
@@ -33,21 +43,6 @@ div[data-testid="stSidebar"] img {
     margin-top:5px;
     margin-bottom:10px;
     width:70%;
-}
-
-/* Sidebar */
-[data-testid="stSidebar"] {
-    background-color: #cce6ff !important;
-    padding-top: 20px;
-    width: 300px !important;  /* ancho más ancho */
-}
-/* Sidebar title */
-.sidebar-title {
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    color: #0059b3;
-    margin-bottom: 20px;
 }
 
 /* Sidebar buttons uniform */
@@ -62,10 +57,16 @@ div[data-testid="stSidebar"] img {
     border-radius: 8px;
     font-size: 16px;
     font-weight: bold;
-    text-decoration: none;  /* <--- quita subrayado */
+    text-decoration: none !important;  /* quita subrayado */
     transition: background-color 0.2s, transform 0.2s;
     cursor: pointer;
 }
+/* Forzar también en hijos por seguridad */
+.sidebar-button * {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
 .sidebar-button:hover {
     background-color: #80bfff;
     transform: translateY(-2px);

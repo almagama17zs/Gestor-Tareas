@@ -1,4 +1,3 @@
-# frontend/app.py
 import streamlit as st
 from datetime import datetime, date, time
 import os
@@ -29,12 +28,14 @@ body {background-color: #e6f2ff;}
 .priority-4 {background-color: #e6ffcc;}
 .priority-5 {background-color: #ccffcc;}
 
-/* Sidebar */
+/* Sidebar styling */
 [data-testid="stSidebar"] {
     background-color: #cce6ff !important;
     padding-top: 20px;
     width: 300px !important;
 }
+
+/* Sidebar title */
 .sidebar-title {
     font-size: 24px;
     font-weight: bold;
@@ -43,27 +44,7 @@ body {background-color: #e6f2ff;}
     margin-bottom: 20px;
 }
 
-/* Sidebar HTML buttons */
-.sidebar-button {
-    display: block;
-    width: 90%;
-    height: 50px;
-    line-height: 50px;
-    margin: 5px auto;
-    text-align: center;
-    background-color: #99ccff;
-    color: #003366;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 16px;
-    transition: background-color 0.2s, transform 0.2s;
-}
-.sidebar-button:hover {
-    background-color: #80bfff;
-    transform: translateY(-2px);
-}
+/* Sidebar logo */
 div[data-testid="stSidebar"] img {
     display: block;
     margin-left:auto;
@@ -71,6 +52,33 @@ div[data-testid="stSidebar"] img {
     margin-top:5px;
     margin-bottom:10px;
     width:70%;
+}
+
+/* Sidebar buttons uniform */
+.sidebar-button {
+    display: block;
+    width: 90%;
+    margin: 5px auto;
+    padding: 12px 0;
+    text-align: center;
+    background-color: #99ccff;
+    color: #003366;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none !important;  /* quita subrayado */
+    transition: background-color 0.2s, transform 0.2s;
+    cursor: pointer;
+}
+/* Forzar también en hijos por seguridad */
+.sidebar-button * {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+.sidebar-button:hover {
+    background-color: #80bfff;
+    transform: translateY(-2px);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -131,7 +139,6 @@ for icon, value in menu_items:
     st.sidebar.markdown(f'''
         <a class="sidebar-button" href="?menu={value}" target="_self">{icon}</a>
     ''', unsafe_allow_html=True)
-
 
 # ------------------ Views ------------------
 if menu == "Ver tareas":
